@@ -1,43 +1,53 @@
 import asyncio
 import random
 import string
-from xml.dom import WrongDocumentErr
 
-async def string_maker():
-    n = 6
-    s1 = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k = n))
-    list = [s1,"MARUTI"]
-    return random.choice(list)
+class File_writer:
 
-async def file_writer():
-    f1 = open("file1.txt","a+")
-    f2 = open("file2.txt","a+") 
+    def __init__(self,file):
+        self.file = file
 
-    for i in range(100):
-        result = await string_maker()
-        f1.write(result + " ")
-        result = await string_maker()
-        f2.write(result+ " ")
+    async def string_maker(self):
+        n = 6
+        s1 = ''.join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k = n))
+        list = [s1,"MARUTI"]
+        return random.choice(list)
 
+
+    async def writer(self):
+        f = open(self.file,"a+")
+
+        for i in range(100):
+            result = await self.string_maker()
+            f.write(result + " ")
     
-async def worker_class():
-    
-    while(True):
-        await file_writer()        
+class Counter:
 
-        file1 = open("file1.txt","r")
-        file2 = open("file2.txt","r")
-        file3 = open("count.log","w")
-        data1 = file1.read()
-        data2 = file2.read()
+    def __init__(self,file1,file2):
+        self.file1 = file1
+        self.file2 = file2
+
+    def counter_class(self):
+        f1 = open(self.file1,"r")
+        f2 = open(self.file2,"r")
+        counter = open("count.log","w")
+
+        data1 = f1.read()
+        data2 = f2.read()
 
         n1 = data1.count("MARUTI")
-        file3.write("Count for 'MARUTI' in file1 is " + str(n1) + "\n")
-
         n2 = data2.count("MARUTI")
-        file3.write("Count for 'MARUTI' in file2 is " + str(n2))
-
-        await asyncio.sleep(1)
+        counter.write("Count for 'MARUTI' in {} is ".format(self.file1) + str(n1) + "\n")
+        counter.write("Count for 'MARUTI' in {} is ".format(self.file2) + str(n2) + "\n")
 
 if __name__=="__main__":
-    asyncio.run(worker_class())
+
+    while(True):
+        writer1 = File_writer("file1.txt")
+        writer2 = File_writer("file2.txt")
+        counter = Counter("file1.txt","file2.txt")
+
+        asyncio.run(writer1.writer())
+        asyncio.run(writer2.writer())
+
+        counter.counter_class()
